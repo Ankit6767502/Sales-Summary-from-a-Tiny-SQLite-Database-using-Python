@@ -1,0 +1,80 @@
+Python 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import sqlite3
+>>>
+>>> # Create a database (file will be created in your current directory)
+>>> conn = sqlite3.connect("sales_data.db")
+>>> cursor = conn.cursor()
+>>>
+>>> # Create sales table
+>>> cursor.execute('''
+... CREATE TABLE IF NOT EXISTS sales (
+...     id INTEGER PRIMARY KEY,
+...         product TEXT,
+...             quantity INTEGER,
+...                 price REAL
+...                 )
+...                 ''')
+<sqlite3.Cursor object at 0x000001F40C4F3CC0>
+>>>
+>>> # Insert some sample data
+>>> sample_data = [
+...     ('Apple', 10, 1.5),
+...         ('Banana', 20, 0.5),
+...             ('Apple', 5, 1.5),
+...                 ('Orange', 15, 1.0),
+...                     ('Banana', 10, 0.5),
+...                         ('Orange', 5, 1.0)
+...                         ]
+>>> cursor.executemany("INSERT INTO sales (product, quantity, price) VALUES (?, ?, ?)", sample_data)
+<sqlite3.Cursor object at 0x000001F40C4F3CC0>
+>>>
+>>> # Save (commit) the changes and close the connection
+>>> conn.commit()
+>>> conn.close()
+>>>
+>>> import sqlite3
+>>> import pandas as pd
+>>>
+>>> # Connect to the existing database
+>>> conn = sqlite3.connect("sales_data.db")
+>>>
+>>> # Run SQL query
+>>> query = """
+... SELECT
+...     product,
+...         SUM(quantity) AS total_quantity,
+...             SUM(quantity * price) AS revenue
+...             FROM sales
+...             GROUP BY product
+...             """
+>>> df = pd.read_sql_query(query, conn)
+>>>
+>>> # Print the results
+>>> print(df)
+  product  total_quantity  revenue
+0   Apple              30     45.0
+1  Banana              60     30.0
+2  Orange              40     40.0
+>>>
+>>> # Close connection
+>>> conn.close()
+>>> import matplotlib.pyplot as plt
+>>>
+>>> # Plotting
+>>> df.plot(kind='bar', x='product', y='revenue', legend=False, color='skyblue')
+<Axes: xlabel='product'>
+>>> plt.title("Revenue by Product")
+Text(0.5, 1.0, 'Revenue by Product')
+>>> plt.xlabel("Product")
+Text(0.5, 0, 'Product')
+>>> plt.ylabel("Revenue")
+Text(0, 0.5, 'Revenue')
+>>> plt.tight_layout()
+>>>
+>>> # Show the plot
+>>> plt.show()
+>>>
+>>> # Optional: Save the chart
+>>> plt.savefig("sales_chart.png")
+>>>
